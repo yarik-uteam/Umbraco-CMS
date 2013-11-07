@@ -6,7 +6,7 @@ using System.Web.UI.WebControls;
 using Umbraco.Core.IO;
 using umbraco.cms.businesslogic.web;
 using umbraco.presentation.create;
-using Content=umbraco.cms.businesslogic.Content;
+using Content = umbraco.cms.businesslogic.Content;
 using umbraco.cms.helpers;
 using umbraco.BasePages;
 
@@ -39,18 +39,14 @@ namespace umbraco.cms.presentation.create.controls
                 var documentTypeList = DocumentType.GetAllAsList().ToList();
                 foreach (var dt in documentTypeList)
                 {
-                    string docDescription = string.Empty;
+                    string docDescription = "<em>No description available...</em>";
                     if (string.IsNullOrEmpty(dt.Description) == false)
-                    {
-                        docDescription = System.Web.HttpUtility.HtmlEncode(dt.Description);
-                    }
-                    else
-                    {
-                        docDescription = "<em>No description available...</em>";
-                    }
+                        docDescription = dt.Description;
                     docDescription = "<strong>" + dt.Text + "</strong><br/>" + docDescription.Replace(Environment.NewLine, "<br />");
+                    docDescription = docDescription.Replace("'", "\\'");
+
                     var docImage = (dt.Thumbnail != "") ? dt.Thumbnail : "../nada.gif";
-                    docImage = IOHelper.ResolveUrl( SystemDirectories.Umbraco ) + "/images/thumbnails/" + docImage;
+                    docImage = IOHelper.ResolveUrl(SystemDirectories.Umbraco) + "/images/thumbnails/" + docImage;
 
                     var li = new ListItem();
                     li.Text = dt.Text;
@@ -59,31 +55,31 @@ namespace umbraco.cms.presentation.create.controls
                     if (nodeId > 0)
                     {
                         foreach (var i in allowedIds) if (i == dt.Id)
-                        {
-                            nodeType.Items.Add(li);
-                            js.Append("typeInfo[" + counter + "] = '<img src=\"" + docImage + "\"><p>" +
-                                      docDescription + "</p>'\n");
-
-                            if (typeInited == false)
                             {
-                                descr.Text = "<img src=\"" + docImage + "\"><p>" +
-                                             docDescription + "</p>";
-                                typeInited = true;
-                                
+                                nodeType.Items.Add(li);
+                                js.Append("typeInfo[" + counter + "] = '<img src=\"" + docImage + "\"><p>" +
+                                          docDescription + "</p>'\n");
+
+                                if (typeInited == false)
+                                {
+                                    descr.Text = "<img src=\"" + docImage + "\"><p>" +
+                                                 docDescription + "</p>";
+                                    typeInited = true;
+
+                                }
+                                counter++;
                             }
-                            counter++;
-                        }
                     }
                     // The Any check is here for backwards compatibility, if none are allowed at root, then all are allowed
                     else if (documentTypeList.Any(d => d.AllowAtRoot) == false || dt.AllowAtRoot)
                     {
                         nodeType.Items.Add(li);
                         js.Append("typeInfo[" + counter + "] = '<img src=\"" + docImage + "\"><p>" +
-                                  docDescription + "</p>\n");
+                                  docDescription + "</p>'\n");
                         if (typeInited == false)
                         {
                             descr.Text = "<img src=\"" + docImage + "\"><p>" +
-                                         docDescription + "</p>";
+                                         docDescription + "</p>'";
                             typeInited = true;
                         }
                         counter++;
@@ -91,14 +87,15 @@ namespace umbraco.cms.presentation.create.controls
 
 
                 }
-                if (nodeType.Items.Count == 0) {
+                if (nodeType.Items.Count == 0)
+                {
                     sbmt.Enabled = false;
                 }
                 typeJs.Text = "<script type=\"text/javascript\">\nvar typeInfo = new Array(" + counter.ToString() + ");\n " + js.ToString() + "\n</script>\n    ";
             }
         }
 
-        
+
         protected void sbmt_Click(object sender, EventArgs e)
         {
             DoCreation();
@@ -115,9 +112,9 @@ namespace umbraco.cms.presentation.create.controls
                     int.Parse(Request["nodeID"]),
                     rename.Text);
 
-				BasePage.Current.ClientTools
-					.ChangeContentFrameUrl(returnUrl)
-					.CloseModalWindow();
+                BasePage.Current.ClientTools
+                    .ChangeContentFrameUrl(returnUrl)
+                    .CloseModalWindow();
 
             }
         }
