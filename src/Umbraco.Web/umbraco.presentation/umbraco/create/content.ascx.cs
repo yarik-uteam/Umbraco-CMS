@@ -39,12 +39,16 @@ namespace umbraco.cms.presentation.create.controls
                 var documentTypeList = DocumentType.GetAllAsList().ToList();
                 foreach (var dt in documentTypeList)
                 {
-                    string docDescription = "<em>No description available...</em>";
+                    string docDescription = string.Empty;
                     if (string.IsNullOrEmpty(dt.Description) == false)
-                        docDescription = dt.Description;
+                    {
+                        docDescription = System.Web.HttpUtility.HtmlEncode(dt.Description);
+                    }
+                    else
+                    {
+                        docDescription = "<em>No description available...</em>";
+                    }
                     docDescription = "<strong>" + dt.Text + "</strong><br/>" + docDescription.Replace(Environment.NewLine, "<br />");
-                    docDescription = docDescription.Replace("'", "\\'");
-
                     var docImage = (dt.Thumbnail != "") ? dt.Thumbnail : "../nada.gif";
                     docImage = IOHelper.ResolveUrl( SystemDirectories.Umbraco ) + "/images/thumbnails/" + docImage;
 
@@ -75,11 +79,11 @@ namespace umbraco.cms.presentation.create.controls
                     {
                         nodeType.Items.Add(li);
                         js.Append("typeInfo[" + counter + "] = '<img src=\"" + docImage + "\"><p>" +
-                                  docDescription + "</p>'\n");
+                                  docDescription + "</p>\n");
                         if (typeInited == false)
                         {
                             descr.Text = "<img src=\"" + docImage + "\"><p>" +
-                                         docDescription + "</p>'";
+                                         docDescription + "</p>";
                             typeInited = true;
                         }
                         counter++;
